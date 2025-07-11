@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Number Recall Challenge</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 50px; background: #f0f0f0; }
+    #game-container { max-width: 400px; margin: 0 auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    #sequence { font-size: 48px; margin: 20px 0; color: #007bff; }
+    #input { padding: 10px; font-size: 24px; width: 200px; margin: 10px 0; }
+    #feedback { font-size: 20px; margin: 10px 0; }
+    #score { font-size: 18px; }
+    button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <h1>Number Recall Challenge</h1>
+    <p>Memorize the sequence, then type it back. 20 rounds total.</p>
+    <div id="sequence"></div>
+    <input type="text" id="input" class="hidden" placeholder="Enter the sequence">
+    <button id="start-btn">Start Game</button>
+    <button id="submit-btn" class="hidden">Submit</button>
+    <div id="feedback"></div>
+    <div id="score">Score: 0/20 | Round: 1</div>
+  </div>
+
+  <script>
+    let currentRound = 1;
+    let score = 0;
+    let sequenceLength = 3;
+    let currentSequence = '';
+    const maxRounds = 20;
+
+    const sequenceEl = document.getElementById('sequence');
+    const inputEl = document.getElementById('input');
+    const startBtn = document.getElementById('start-btn');
+    const submitBtn = document.getElementById('submit-btn');
+    const feedbackEl = document.getElementById('feedback');
+    const scoreEl = document.getElementById('score');
+
+    startBtn.addEventListener('click', startGame);
+
+    function startGame() {
+      currentRound = 1;
+      score = 0;
+      sequenceLength = 3;
+      updateScore();
+      startRound();
+      startBtn.classList.add('hidden');
+    }
+
+    function startRound() {
+      if (currentRound > maxRounds) {
+        endGame();
+        return;
+      }
+      generateSequence();
+      sequenceEl.textContent = currentSequence;
+      inputEl.classList.add('hidden');
+      submitBtn.classList.add('hidden');
+      feedbackEl.textContent = 'Memorize this...';
+      setTimeout(hideSequence, 2000); // 2 seconds to memorize
+    }
+
+    function generateSequence() {
+      currentSequence = '';
+      for (let i = 0; i < sequenceLength; i++) {
+        currentSequence += Math.floor(Math.random() * 10); // 0-9
+      }
+    }
+
+    function hideSequence() {
+      sequenceEl.textContent = '?????';
+      inputEl.classList.remove('hidden');
+      submitBtn.classList.remove('hidden');
+      inputEl.value = '';
+      inputEl.focus();
+      feedbackEl.textContent = 'Enter the sequence:';
+      submitBtn.onclick = checkAnswer;
+      inputEl.addEventListener('keydown', handleEnter);
+    }
+
+    function handleEnter(event) {
+      if (event.key === 'Enter') {
+        checkAnswer();
+      }
+    }
+
+    function checkAnswer() {
+      const userInput = inputEl.value.trim();
+      inputEl.removeEventListener('keydown', handleEnter); // Clean up listener
+      if (userInput === currentSequence) {
+        feedbackEl.textContent = 'Correct!';
+        score++;
+        if (score % 3 === 0 && sequenceLength < 10) sequenceLength++; // Increase difficulty every 3 correct
+      } else {
+        feedbackEl.textContent = `Wrong! It was ${currentSequence}.`;
+      }
+      updateScore();
+      currentRound++;
+      setTimeout(startRound, 2000); // Pause before next round
+    }
+
+    function updateScore() {
+      scoreEl.textContent = `Score: ${score}/${maxRounds} | Round: ${currentRound}`;
+    }
+
+    function endGame() {
+      feedbackEl.textContent = `Game Over! Final Score: ${score}/${maxRounds}`;
+      sequenceEl.textContent = '';
+      inputEl.classList.add('hidden');
+      submitBtn.classList.add('hidden');
+      startBtn.textContent = 'Play Again';
+      startBtn.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
