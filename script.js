@@ -1,8 +1,13 @@
 const gameBoard = document.getElementById("gameBoard");
 const statusText = document.getElementById("status");
 
-const symbols = ["🍎", "🍌", "🍒", "🍇", "🍉", "🥝", "🍍", "🍓"];
-let cards = [...symbols, ...symbols]; // duplicate symbols
+const numPairs = 8;
+let images = [];
+for (let i = 0; i < numPairs; i++) {
+  const seed = Math.random().toString(36).substring(7);
+  images.push(`https://picsum.photos/seed/${seed}/200/200`);
+}
+let cards = [...images, ...images]; // duplicate for pairs
 let revealedCards = [];
 let matchedCards = [];
 
@@ -13,10 +18,10 @@ function shuffle(array) {
   }
 }
 
-function createCard(symbol, index) {
+function createCard(imageUrl, index) {
   const card = document.createElement("div");
   card.className = "card";
-  card.dataset.symbol = symbol;
+  card.dataset.imageUrl = imageUrl;
   card.dataset.index = index;
   card.addEventListener("click", () => handleCardClick(card));
   gameBoard.appendChild(card);
@@ -32,7 +37,7 @@ function handleCardClick(card) {
   }
 
   card.classList.add("revealed");
-  card.textContent = card.dataset.symbol;
+  card.style.backgroundImage = `url(${card.dataset.imageUrl})`;
   revealedCards.push(card);
 
   if (revealedCards.length === 2) {
@@ -42,7 +47,7 @@ function handleCardClick(card) {
 
 function checkMatch() {
   const [card1, card2] = revealedCards;
-  if (card1.dataset.symbol === card2.dataset.symbol) {
+  if (card1.dataset.imageUrl === card2.dataset.imageUrl) {
     card1.classList.add("matched");
     card2.classList.add("matched");
     matchedCards.push(card1, card2);
@@ -55,8 +60,8 @@ function checkMatch() {
     setTimeout(() => {
       card1.classList.remove("revealed");
       card2.classList.remove("revealed");
-      card1.textContent = "";
-      card2.textContent = "";
+      card1.style.backgroundImage = "";
+      card2.style.backgroundImage = "";
       statusText.textContent = "";
     }, 1000);
   }
@@ -68,8 +73,15 @@ function startGame() {
   statusText.textContent = "";
   matchedCards = [];
   revealedCards = [];
+  // Regenerate random images each game
+  images = [];
+  for (let i = 0; i < numPairs; i++) {
+    const seed = Math.random().toString(36).substring(7);
+    images.push(`https://picsum.photos/seed/${seed}/200/200`);
+  }
+  cards = [...images, ...images];
   shuffle(cards);
-  cards.forEach((symbol, i) => createCard(symbol, i));
+  cards.forEach((imageUrl, i) => createCard(imageUrl, i));
 }
 
 startGame();
